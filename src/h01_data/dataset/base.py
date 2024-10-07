@@ -30,20 +30,6 @@ class BaseDataset():
         df['ref_token'] = df[['text_id', 'word_id']].apply(
             lambda x: split_strings[x['text_id']][x['word_id']], axis=1)
 
-        # if dataset == 'provo':
-        #     df['word'] = df['word'].apply(lambda x: x.lower().strip(punctuation))
-        #     df['ref_token'] = df['ref_token'].apply(lambda x: x.lower().strip(punctuation))
-        #     assert (df['word'] == df['ref_token']).all()
-
-        # if dataset == 'dundee':
-        #     df['word_orig'] = df['word']
-        #     df['word'] = df['word'].apply(lambda x: x.strip(punctuation + ' \t').replace('"', '‚').replace(',‚', '‚,'))
-        #     df['ref_token2'] = df['ref_token'].apply(lambda x: x.strip(punctuation + ' \t').strip('‚"').replace('”', '‚'))
-
-        #     assert ((df['word'] == df['ref_token2']) | (df['word_orig'] == ' (HFEA) ') | (df['word_orig'].apply(len) == 20)).all()
-        # else:
-        #     pass
-
         # Center times per worker
         df['centered_time'] = df['time'] - df.groupby(by=["WorkerId"])["time"].transform('mean')
 

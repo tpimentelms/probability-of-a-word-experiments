@@ -1,4 +1,5 @@
 import csv
+from collections import defaultdict
 from string import punctuation
 import numpy as np
 import mosestokenizer
@@ -13,7 +14,7 @@ class UnigramModel:
 
     def __init__(self, lang='en'):
         self.lang = lang
-        if lang == 'en':
+        if lang in ['en', 'english']:
             with open('corpora/rt/unigrams.csv', mode='r', encoding='utf8') as infile:
                 reader = csv.reader(infile)
                 self.lookup = {rows[0]:-float(rows[1]) for rows in reader}
@@ -31,6 +32,18 @@ class UnigramModel:
             return np.nan
 
 
+class ConstantModel:
+    # pylint: disable=too-few-public-methods
+
+    def __init__(self, lang='en'):
+        self.lang = lang
+
+    def __getitem__(self, key):
+        if key == '':
+            return np.nan
+        return 1
+
+
 FREQ_MODEL = None
 def frequency(word, lang="en"):
     word = word.strip().strip(punctuation).lower()
@@ -38,5 +51,8 @@ def frequency(word, lang="en"):
     # pylint: disable=global-statement
     global FREQ_MODEL
     if not FREQ_MODEL or FREQ_MODEL.lang != lang:
-        FREQ_MODEL = UnigramModel(lang)
+        if lang in ['en', 'english']:
+            FREQ_MODEL = UnigramModel(lang)
+        else:
+            FREQ_MODEL = ConstantModel(lang)
     return FREQ_MODEL[word]

@@ -3,7 +3,7 @@ import sys
 import argparse
 
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
-from dataset import BrownDataset, NaturalStoriesDataset, ProvoDataset, DundeeDataset
+from dataset import BrownDataset, NaturalStoriesDataset, ProvoDataset, DundeeDataset, MecoDataset
 from utils import utils
 
 
@@ -12,6 +12,7 @@ def get_args():
     # Data
     parser.add_argument('--input-path', type=str, required=True)
     parser.add_argument('--dataset', type=str, required=True)
+    parser.add_argument('--language', type=str, default='english')
     # Output
     parser.add_argument('--output-fname', type=str, required=True)
 
@@ -27,6 +28,8 @@ def get_text(args):
         df = ProvoDataset.preprocess(args.input_path)
     elif args.dataset == 'dundee':
         df = DundeeDataset.preprocess(args.input_path)
+    elif args.dataset == 'meco':
+        df = MecoDataset.preprocess(args.input_path, args.language)
     else:
         raise ValueError('Invalid dataset name: %s' % args.dataset)
 
