@@ -96,7 +96,7 @@ def plot_wordlength_results(args):
     plt.tight_layout()
     plt.xscale('log')
 
-    g = sns.FacetGrid(all_dfs, col="metric", height=3.5, aspect=.65, sharey=True, gridspec_kws={"wspace":0.3}) #
+    g = sns.FacetGrid(all_dfs, col="metric", height=2.8, aspect=.65 * (3.5/2.8), sharey=True, gridspec_kws={"wspace":0.3}) #
     g.set_titles(col_template="{col_name}",fontsize=10)
 
     g.map_dataframe(sns.lineplot, x='size', y='value', hue='name', style='hypothesis', errorbar=('ci', 95), n_boot=20000)

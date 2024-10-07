@@ -29,7 +29,7 @@ def get_args():
 
 def get_spillover_llh(model, datasets, predictor, predictor_type, predictor_times):
     dfs = []
-    fname_base = 'checkpoints/delta_llh/llh-%s-%s.tsv'
+    fname_base = 'checkpoints/rt/delta_llh/llh-%s-%s.tsv'
     for dataset in datasets:
         fname = fname_base % (dataset, model)
         df = pd.read_csv(fname, sep='\t')
@@ -186,14 +186,12 @@ def get_pvalues(model, datasets, predictors, predictor_times):
 
 def main():
     args = get_args()
-    predictor_times = ['prev3_', 'prev2_', 'prev_', '']
+    # predictor_times = ['prev3_', 'prev2_', 'prev_', '']
+    predictor_times = ['']
     predictors = [(args.predictor, 'new'), (args.predictor, 'new_raw'), ('surprisal_buggy', 'new_raw')]
     models = ['gpt2-small', 'gpt2-medium', 'gpt2-large', 'gpt2-xl']
     models += ['pythia-70m', 'pythia-160m', 'pythia-410m', 'pythia-14b', 'pythia-28b', 'pythia-69b', 'pythia-120b']
-    # models += ['pythia-70m', 'pythia-160m', 'pythia-410m', 'pythia-14b', 'pythia-28b']
-    # datasets = ['brown', 'natural_stories', 'provo_skip2zero']
-    datasets = ['natural_stories', 'provo', 'dundee']
-    # predictors = []
+    datasets = ['brown', 'natural_stories', 'provo', 'dundee']
 
     for model in models:
         print('\\midrule\\multirow{4}{*}{%s}' % model)
