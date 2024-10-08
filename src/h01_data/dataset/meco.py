@@ -43,14 +43,31 @@ class MecoDataset(BaseDataset):
         # Exclude outliers
         df = utils.find_outliers(df, transform=np.log)
 
-        # Fix bug in the numbering of word_id's in Spanish
+        # Fix bug in skipped word_id's in data
         if language == 'sp':
-            df.loc[(df.text_id == 9) & (df.word_id > 124), 'word_id'] = \
-                df.loc[(df.text_id == 9) & (df.word_id > 124), 'word_id'] - 1 
-            assert (df.drop_duplicates(['text_id', 'word_id', 'word']).shape[0] == 
-                    df.drop_duplicates(['text_id', 'word_id']).shape[0])
+            cls.fix_skipped_id(df, text_id=9, word_id=124)
+        elif language == 'fi':
+            cls.fix_skipped_id(df, text_id=4, word_id=117)
+            cls.fix_skipped_id(df, text_id=8, word_id=84)
+            cls.fix_skipped_id(df, text_id=9, word_id=45)
+
+        # Check no two different words with same id
+        assert (df.drop_duplicates(['text_id', 'word_id', 'word']).shape[0] == 
+                df.drop_duplicates(['text_id', 'word_id']).shape[0])
 
         # Create preprocessed dataframe
+        # cls.create_analysis_dataframe(df[df.text_id == 1].copy(), ns_text_words)
+        # cls.create_analysis_dataframe(df[df.text_id == 9].copy(), ns_text_words)
+        # set(range(188)) - set(df[df.text_id == 9].sort_values('word_id').drop_duplicates('word_id').word_id.unique())
+        # set(range(188)) - set(df[df.text_id == 8].sort_values('word_id').drop_duplicates('word_id').word_id.unique())
+
+        # df2 = df.drop_duplicates(['text_id', 'word_id']).sort_values(['text_id', 'word_id'])
+        # df2['word_id2'] = df2.groupby("text_id", sort=False)['word_id'].shift(periods=1, fill_value=None) + 1
+        # df2.loc[df2['word_id2'].isna(), 'word_id2'] = 0
+        # df2[df2.word_id != df2.word_id2]
+        # df2[df2.word == '']
+        # import ipdb; ipdb.set_trace()
+
         df = cls.create_analysis_dataframe(df, ns_text_words)
 
         # Check word matches ref_token
@@ -95,6 +112,18 @@ class MecoDataset(BaseDataset):
         assert (df.time.isna() == df.skipped).all()
         df.loc[df.skipped == 1, 'time'] = 0
 
+        # Fix bug caused by empty words in data
+        if language == 'fi':
+            df = df[df.word != '']
+            cls.fix_skipped_id(df, text_id=7, word_id=40)
+            cls.fix_skipped_id(df, text_id=11, word_id=94)
+        elif language == 'gr':
+            df = df[df.word != '']
+            cls.fix_skipped_id(df, text_id=7, word_id=6)
+            cls.fix_skipped_id(df, text_id=11, word_id=133)
+        elif language == 'it':
+            cls.fix_skipped_id(df, text_id=9, word_id=146)
+
         return df.copy()
     
     @staticmethod
@@ -112,3 +141,9 @@ class MecoDataset(BaseDataset):
             pydf_dict[f] = pandas2ri.rpy2py_dataframe(rdf_List[i])
 
         return pydf_dict['joint.data']
+
+    @staticmethod
+    def fix_skipped_id(df, text_id, word_id):
+        df.loc[(df.text_id == text_id) & (df.word_id > word_id), 'word_id'] = \
+            df.loc[(df.text_id == text_id) & (df.word_id > word_id), 'word_id'] - 1  
+        

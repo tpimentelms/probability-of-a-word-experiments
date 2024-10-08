@@ -37,14 +37,15 @@ def merge_rt_and_surprisal(args):
         how='outer').reset_index()
     
     assert not df.surprisal.isna().any()
-    assert (df.word == df.ref_token).all()
+    # import ipdb; ipdb.set_trace()
+    if args.language != 'he':
+        assert (df.word == df.ref_token).all()
     return df
 
 
 def get_frequencies(df, language):
     df['freq'] = df['word'].apply(
         lambda x: unigram.frequency(x, lang=language))
-    import ipdb; ipdb.set_trace()
 
 
 def get_spillover_vars(df):

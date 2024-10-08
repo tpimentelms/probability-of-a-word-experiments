@@ -56,6 +56,7 @@ DATASET_NAMES = {
     'provo_skip2zero': 'Provo',
     'dundee': 'Dundee',
     'dundee_skip2zero': 'Dundee',
+    'meco': 'Meco',
 }
 DATASET_NAMES_PLOT = {
     'natural_stories': 'Natural Stories',
