@@ -5,7 +5,7 @@ for model in 'gpt2-small' 'gpt2-medium' 'gpt2-large' 'gpt2-xl' \
 do
     for dataset in 'natural_stories' 'provo' 'dundee' 'brown'
     do
-        CUDA_VISIBLE_DEVICES=-1 make process_data MODEL=${model} DATASET=${dataset}
+        make process_data MODEL=${model} DATASET=${dataset}
         make get_llh MODEL=${model} DATASET=${dataset}
     done
 done
@@ -16,4 +16,12 @@ do
     do
         make get_llh -f MakefileWordLengths MODEL=${model}
     done
+done
+
+dataset=meco
+model=mgpt
+for language in 'fi' 'ge' 'gr' 'he' 'it' 'sp' 'tr'
+do
+    make -f MakefileMultilingual process_data MODEL=${model} DATASET=${dataset} LANGUAGE=${language}
+    make -f MakefileMultilingual get_llh MODEL=${model} DATASET=${dataset} LANGUAGE=${language}
 done
