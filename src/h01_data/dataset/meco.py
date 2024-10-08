@@ -58,19 +58,7 @@ class MecoDataset(BaseDataset):
         assert (df.drop_duplicates(['text_id', 'word_id', 'word']).shape[0] == 
                 df.drop_duplicates(['text_id', 'word_id']).shape[0])
 
-        # Create preprocessed dataframe
-        # cls.create_analysis_dataframe(df[df.text_id == 1].copy(), ns_text_words)
-        # cls.create_analysis_dataframe(df[df.text_id == 9].copy(), ns_text_words)
-        # set(range(188)) - set(df[df.text_id == 9].sort_values('word_id').drop_duplicates('word_id').word_id.unique())
-        # set(range(188)) - set(df[df.text_id == 8].sort_values('word_id').drop_duplicates('word_id').word_id.unique())
-
-        df2 = df.drop_duplicates(['text_id', 'word_id']).sort_values(['text_id', 'word_id'])
-        df2['word_id2'] = df2.groupby("text_id", sort=False)['word_id'].shift(periods=1, fill_value=None) + 1
-        df2.loc[df2['word_id2'].isna(), 'word_id2'] = 0
-        df2[df2.word_id != df2.word_id2]
-        df2[df2.word == '']
-        import ipdb; ipdb.set_trace()
-
+        # Create dataframe
         df = cls.create_analysis_dataframe(df, ns_text_words)
 
         # Check word matches ref_token
