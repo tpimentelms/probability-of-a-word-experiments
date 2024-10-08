@@ -37,8 +37,7 @@ def merge_rt_and_surprisal(args):
         how='outer').reset_index()
     
     assert not df.surprisal.isna().any()
-    # import ipdb; ipdb.set_trace()
-    if args.language != 'he':
+    if args.language not in {'he', 'gr'}:
         assert (df.word == df.ref_token).all()
     return df
 

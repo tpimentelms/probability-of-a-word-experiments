@@ -10,13 +10,14 @@ from utils import utils
 
 
 class MecoDataset(BaseDataset):
-    languages = ['fi', 'ge', 'gr', 'he', 'it', 'ko', 'en',
-                 'sp', 'tr']
+    languages = ['fi', 'ge', 'gr', 'he', 'it', 'sp', 'tr']
     # 'ru': df[df.lang.isna()] reveals a bug in the Russian data.
     # 'en': (df.drop_duplicates(['text_id', 'word_id', 'word']).shape[0] == 
     #        df.drop_duplicates(['text_id', 'word_id']).shape[0]) reveals a bug in English data.
     # 'ee': not in mGPT
     # 'no': not in mGPT
+    # 'ko': whitespaces within "words" generates a bug. 
+    #       Could solve with `df.word = df.word.apply(lambda x: ''.join(x.split()))`
     # 'du': (maybe) not in mGPT? https://huggingface.co/ai-forever/mGPT says no, plot says yes.
     kept_columns_initial = {'trialid': 'text_id', 'ianum': 'word_id', 'ia': 'word', 
                             'skip': 'skipped', 'firstrun.dur': 'time', 
@@ -50,6 +51,8 @@ class MecoDataset(BaseDataset):
             cls.fix_skipped_id(df, text_id=4, word_id=117)
             cls.fix_skipped_id(df, text_id=8, word_id=84)
             cls.fix_skipped_id(df, text_id=9, word_id=45)
+        elif language == 'ko':
+            cls.fix_skipped_id(df, text_id=11, word_id=24)
 
         # Check no two different words with same id
         assert (df.drop_duplicates(['text_id', 'word_id', 'word']).shape[0] == 
@@ -61,12 +64,12 @@ class MecoDataset(BaseDataset):
         # set(range(188)) - set(df[df.text_id == 9].sort_values('word_id').drop_duplicates('word_id').word_id.unique())
         # set(range(188)) - set(df[df.text_id == 8].sort_values('word_id').drop_duplicates('word_id').word_id.unique())
 
-        # df2 = df.drop_duplicates(['text_id', 'word_id']).sort_values(['text_id', 'word_id'])
-        # df2['word_id2'] = df2.groupby("text_id", sort=False)['word_id'].shift(periods=1, fill_value=None) + 1
-        # df2.loc[df2['word_id2'].isna(), 'word_id2'] = 0
-        # df2[df2.word_id != df2.word_id2]
-        # df2[df2.word == '']
-        # import ipdb; ipdb.set_trace()
+        df2 = df.drop_duplicates(['text_id', 'word_id']).sort_values(['text_id', 'word_id'])
+        df2['word_id2'] = df2.groupby("text_id", sort=False)['word_id'].shift(periods=1, fill_value=None) + 1
+        df2.loc[df2['word_id2'].isna(), 'word_id2'] = 0
+        df2[df2.word_id != df2.word_id2]
+        df2[df2.word == '']
+        import ipdb; ipdb.set_trace()
 
         df = cls.create_analysis_dataframe(df, ns_text_words)
 
@@ -122,7 +125,16 @@ class MecoDataset(BaseDataset):
             cls.fix_skipped_id(df, text_id=7, word_id=6)
             cls.fix_skipped_id(df, text_id=11, word_id=133)
         elif language == 'it':
+            df = df[df.word != '']
             cls.fix_skipped_id(df, text_id=9, word_id=146)
+        elif language == 'ko':
+            df = df[df.word != '']
+            cls.fix_skipped_id(df, text_id=5, word_id=53)
+            cls.fix_skipped_id(df, text_id=7, word_id=54)
+            cls.fix_skipped_id(df, text_id=11, word_id=24)
+        elif language == 'tr':
+            df = df[df.word != '']
+            cls.fix_skipped_id(df, text_id=8, word_id=28)
 
         return df.copy()
     
