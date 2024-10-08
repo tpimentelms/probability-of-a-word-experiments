@@ -125,8 +125,9 @@ def get_color_str(pvalue, is_positive_good, diff):
 def print_deltallh(df, datasets, predictors, predictor_times, scaler=100,
                    print_preffix='', is_positive_good=True,
                    dataset_names=constants.DATASET_NAMES):
+    print_str = ''
     for dataset in datasets:
-        print_str = '%s%s ' % (print_preffix, dataset_names[dataset])
+        # print_str = '%s%s ' % (print_preffix, dataset_names[dataset])
 
         for predictor_base, predictor_type in predictors:
             for predictor_time in predictor_times:
@@ -146,9 +147,9 @@ def print_deltallh(df, datasets, predictors, predictor_times, scaler=100,
                 color_str = get_color_str(pvalue, is_positive_good, diff)
 
                 print_str += '& %s%s%.2f}%s' % (sign_str, color_str, diff * scaler, pvalue_str)
-        print_str += ' \\\\'
+    print_str += ' \\\\'
 
-        print(print_str)
+    print(print_str)
 
 
 def get_corrections(df):
@@ -194,7 +195,8 @@ def main():
     datasets = ['brown', 'natural_stories', 'provo', 'dundee']
 
     for model in models:
-        print('\\midrule\\multirow{4}{*}{%s}' % model)
+        # print('\\midrule\\multirow{4}{*}{%s}' % model)
+        print('%s' % model)
         df_pvalue = get_pvalues(model, datasets, predictors, predictor_times)
         print_deltallh(df_pvalue, datasets, predictors, predictor_times, print_preffix='& ')
 
