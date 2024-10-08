@@ -1,0 +1,53 @@
+LANGUAGE := en
+DATASET := meco
+MODEL := mgpt
+DATA_DIR := ./corpora/rt/
+CHECKPOINT_DIR := ./checkpoints/multiling/
+RESULTS_DIR := ./results/multiling/
+
+DATASET_DIR := $(DATA_DIR)/$(DATASET)/
+CHECKPOINT_LANG_DIR := $(CHECKPOINT_DIR)/$(LANGUAGE)
+
+TEXT_RT_FILE := $(CHECKPOINT_LANG_DIR)/text-$(DATASET).txt
+SURPRISALS_FILE := $(CHECKPOINT_LANG_DIR)/suprisal-$(DATASET)-$(MODEL).tsv
+PREPROCESSED_RT_FILE := $(CHECKPOINT_LANG_DIR)/preprocessed-$(DATASET).tsv
+MERGED_DATA_FILE := $(CHECKPOINT_LANG_DIR)/merged-$(DATASET)-$(MODEL).tsv
+
+ANALYSIS_PARAMS_FNAME_BASE := $(CHECKPOINT_LANG_DIR)/params-$(DATASET)-$(MODEL)
+LLH_FILE := $(CHECKPOINT_LANG_DIR)/llh-$(DATASET)-$(MODEL).tsv
+
+
+all: get_data process_data get_llh
+
+get_llh: $(LLH_FILE)
+
+process_data: $(TEXT_RT_FILE) $(SURPRISALS_FILE) $(PREPROCESSED_RT_FILE) $(MERGED_DATA_FILE)
+
+plot_rt:
+	mkdir -p $(RESULTS_DIR)
+	python src/h03_paper/plot_multilingual.py --input-path $(CHECKPOINT_DIR) --output-path $(RESULTS_DIR)
+
+# Get log-likelihoods of predicting reading times
+$(LLH_FILE):
+	Rscript src/h02_rt_model/rt_vs_surprisal.R $(MERGED_DATA_FILE) $(LLH_FILE) $(ANALYSIS_PARAMS_FNAME_BASE) --merge-workers --is-linear
+
+# Preprocess rt data
+$(MERGED_DATA_FILE):
+	echo "Process rt data in " $(DATASET)
+	python src/h01_data/get_rt_with_surprisal_dataset.py --language $(LANGUAGE) --rt-fname $(PREPROCESSED_RT_FILE) --surprisal-fname $(SURPRISALS_FILE) --output-fname $(MERGED_DATA_FILE)
+
+# Preprocess rt data
+$(PREPROCESSED_RT_FILE):
+	echo "Process rt data in " $(DATASET)
+	python src/h01_data/preprocess_rt_dataset.py --dataset $(DATASET) --language $(LANGUAGE) --input-path $(DATASET_DIR) --output-fname $(PREPROCESSED_RT_FILE)
+
+# Get surprisals
+$(SURPRISALS_FILE):
+	echo "Process rt data in " $(DATASET)
+	wordsprobability --model $(MODEL) --input $(TEXT_RT_FILE) --output $(SURPRISALS_FILE) --return-buggy-surprisals
+
+# Preprocess rt data
+$(TEXT_RT_FILE):
+	echo "Process rt data in " $(DATASET)
+	mkdir -p $(CHECKPOINT_LANG_DIR)
+	python src/h01_data/extract_rt_text.py --dataset $(DATASET) --language $(LANGUAGE) --input-path $(DATASET_DIR) --output-fname $(TEXT_RT_FILE)
